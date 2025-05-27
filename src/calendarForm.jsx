@@ -21,17 +21,63 @@ const initialForm = {
   description: "",
 }
 
+const initialErrors = {
+  eventType: "",
+  eventName: "",
+  startDate: "",
+  endDate: "",
+}
+
 export default function EventForm({ setEvents }) {
   const [form, setForm] = useState(initialForm)
+  const [errors, setErrors] = useState(initialErrors)
+
+  const validateForm = () => {
+    const newErrors = { ...initialErrors }
+    let isValid = true
+
+    if (!form.eventName.trim()) {
+      newErrors.eventName = "Event name is required"
+      isValid = false
+    }
+
+    if (!form.eventType) {
+      newErrors.eventType = "Event type is required"
+      isValid = false
+    }
+
+    if (!form.startDate) {
+      newErrors.startDate = "Start date is required"
+      isValid = false
+    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(form.startDate)) {
+      newErrors.startDate = "Please enter a valid date"
+      isValid = false
+    }
+
+    if (form.endDate && !/^\d{4}-\d{2}-\d{2}$/.test(form.endDate)) {
+      newErrors.endDate = "Please enter a valid date"
+      isValid = false
+    }
+
+    setErrors(newErrors)
+    return isValid
+  }
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }))
+    // Clear error when field is changed
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }))
+    }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    setEvents((prev) => [...prev, form])
-    setForm(initialForm)
+    if (validateForm()) {
+      setEvents((prev) => [...prev, form])
+      setForm(initialForm)
+      setErrors(initialErrors)
+    }
   }
 
   return (
@@ -49,6 +95,8 @@ export default function EventForm({ setEvents }) {
 
         {/* Scrollable Form Content */}
         <form
+          id="event-form"
+          role="form"
           onSubmit={handleSubmit}
           className="flex-1 overflow-y-auto overflow-x-hidden p-[5px] space-y-6"
         >
@@ -60,16 +108,21 @@ export default function EventForm({ setEvents }) {
             <Select value={form.eventType} onValueChange={val => handleChange("eventType", val)}>
               <SelectTrigger
                 id="eventType"
+                data-testid="event-type-select"
+                aria-label="Event Type"
                 className="w-full border border-gray-700 focus:border-gray-900 focus:ring-2 focus:ring-gray-300 rounded-md py-2 px-3 bg-white text-blue-900"
               >
                 <SelectValue placeholder="Select event type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Meeting">Meeting</SelectItem>
-                <SelectItem value="Reminder">Reminder</SelectItem>
-                <SelectItem value="Appointment">Appointment</SelectItem>
+                <SelectItem data-testid="event-type-option-meeting" value="Meeting">Meeting</SelectItem>
+                <SelectItem data-testid="event-type-option-reminder" value="Reminder">Reminder</SelectItem>
+                <SelectItem data-testid="event-type-option-appointment" value="Appointment">Appointment</SelectItem>
               </SelectContent>
             </Select>
+            {errors.eventType && (
+              <p className="text-red-500 text-sm mt-1">{errors.eventType}</p>
+            )}
           </div>
 
           {/* Event Name */}
@@ -79,11 +132,15 @@ export default function EventForm({ setEvents }) {
             </Label>
             <Input
               id="eventName"
+              data-testid="event-name-input"
               placeholder="Team Sync"
               value={form.eventName}
               onChange={e => handleChange("eventName", e.target.value)}
               className="w-full border border-gray-700 focus:border-gray-900 focus:ring-2 focus:ring-gray-300 rounded-md py-2 px-3 text-blue-900 bg-white"
             />
+            {errors.eventName && (
+              <p className="text-red-500 text-sm mt-1">{errors.eventName}</p>
+            )}
           </div>
 
           {/* Mode of Meeting */}
@@ -94,14 +151,16 @@ export default function EventForm({ setEvents }) {
             <Select value={form.mode} onValueChange={val => handleChange("mode", val)}>
               <SelectTrigger
                 id="mode"
+                data-testid="mode-select"
+                aria-label="Mode of Meeting"
                 className="w-full border border-gray-700 focus:border-gray-900 focus:ring-2 focus:ring-gray-300 rounded-md py-2 px-3 bg-white text-blue-900"
               >
                 <SelectValue placeholder="Select mode" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Online">Online</SelectItem>
-                <SelectItem value="In-Person">In-Person</SelectItem>
-                <SelectItem value="Hybrid">Hybrid</SelectItem>
+                <SelectItem data-testid="mode-option-online" value="Online">Online</SelectItem>
+                <SelectItem data-testid="mode-option-in-person" value="In-Person">In-Person</SelectItem>
+                <SelectItem data-testid="mode-option-hybrid" value="Hybrid">Hybrid</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -114,11 +173,15 @@ export default function EventForm({ setEvents }) {
               </Label>
               <Input
                 id="startDate"
+                data-testid="start-date-input"
                 type="date"
                 value={form.startDate}
                 onChange={e => handleChange("startDate", e.target.value)}
                 className="input-icons w-full border border-gray-700 focus:border-gray-900 focus:ring-2 focus:ring-gray-300 rounded-md py-2 px-3 text-blue-900 bg-white"
               />
+              {errors.startDate && (
+                <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="startTime" className="block py-2 font-medium text-blue-800">
@@ -138,11 +201,15 @@ export default function EventForm({ setEvents }) {
               </Label>
               <Input
                 id="endDate"
+                data-testid="end-date-input"
                 type="date"
                 value={form.endDate}
                 onChange={e => handleChange("endDate", e.target.value)}
                 className="input-icons w-full border border-gray-700 focus:border-gray-900 focus:ring-2 focus:ring-gray-300 rounded-md py-2 px-3 text-blue-900 bg-white"
               />
+              {errors.endDate && (
+                <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="endTime" className="block py-2 font-medium text-blue-800">
@@ -166,6 +233,7 @@ export default function EventForm({ setEvents }) {
             <Input
               as="textarea"
               id="description"
+              data-testid="description-input"
               placeholder="Event details, agenda, or notes..."
               value={form.description}
               onChange={e => handleChange("description", e.target.value)}
@@ -179,8 +247,8 @@ export default function EventForm({ setEvents }) {
           <Button
             type="submit"
             form="event-form"
+            data-testid="submit-button"
             className="w-full text-lg py-3 rounded-lg border border-blue-700 bg-blue-700 hover:bg-blue-800 text-white font-semibold shadow transition"
-            onClick={handleSubmit}
             style={{ backgroundColor: "black", color: "white" }}
           >
             Submit Event

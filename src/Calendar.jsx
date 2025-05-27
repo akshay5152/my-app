@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/dialog"
 import { Plus, Edit2 } from "lucide-react"
 
-function Calendar() {
+function Calendar({ initialEvents = [], initialTodos = [] }) {
   const [activeTab, setActiveTab] = useState('calendar')
-  const [events, setEvents] = useState([])
-  const [todos, setTodos] = useState([])
+  const [events, setEvents] = useState(initialEvents)
+  const [todos, setTodos] = useState(initialTodos)
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const handleAddTodo = (todoData) => {
@@ -30,6 +30,7 @@ function Calendar() {
             {/* Tab Buttons */}
             <div className="flex gap-4">
               <button
+                data-testid="calendar-tab"
                 className={`px-6 py-2 rounded-full font-semibold shadow transition
                   ${activeTab === 'calendar'
                     ? 'bg-yellow-300 text-blue-900 border-2 border-blue-900'
@@ -40,6 +41,7 @@ function Calendar() {
                 Calendar
               </button>
               <button
+                data-testid="todo-tab"
                 className={`px-6 py-2 rounded-full font-semibold transition
                   ${activeTab === 'todo'
                     ? 'bg-yellow-300 text-blue-900 shadow border-2 border-yellow-600'
@@ -55,9 +57,10 @@ function Calendar() {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <button
+                  data-testid={activeTab === "calendar" ? "add-event-button" : "add-todo-button"}
+                  aria-label={activeTab === "calendar" ? "Add Event" : "Add To Do"}
                   className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white rounded-full px-4 py-2 shadow transition"
                   onClick={() => setDialogOpen(true)}
-                  aria-label={activeTab === "calendar" ? "Add Event" : "Add To Do"}
                 >
                   <Plus size={20} />
                   {activeTab === "calendar" ? "Add Event" : "Add To Do"}
@@ -65,18 +68,20 @@ function Calendar() {
               </DialogTrigger>
               <DialogContent className="w-4/5 max-w-xl mx-auto p-0">
                 <button
-                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                  data-testid="dialog-close"
                   aria-label="Close"
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold"
                   type="button"
                   onClick={() => setDialogOpen(false)}
                 >
-                  &times;
+                  <div data-testid="x-icon" />
+                  <span className="sr-only">Close</span>
                 </button>
                 <div className="p-6">
                   {activeTab === "calendar" ? (
-                    <CalendarForm events={events} setEvents={setEvents} />
+                    <CalendarForm events={events} setEvents={setEvents} onClose={() => setDialogOpen(false)} />
                   ) : (
-                    <ToDoForm todos={todos} setTodos={setTodos} onAddTodo={handleAddTodo} />
+                    <ToDoForm todos={todos} setTodos={setTodos} onAddTodo={handleAddTodo} onClose={() => setDialogOpen(false)} />
                   )}
                 </div>
               </DialogContent>
@@ -86,7 +91,9 @@ function Calendar() {
             {activeTab === 'calendar' ? (
               <div className="flex flex-col items-center justify-center py-12 text-gray-300 relative w-full">
                 {events.length === 0 ? (
-                  <div className="mt-4 text-lg text-gray-400">No events yet</div>
+                  <div data-testid="empty-events-message" className="text-center text-gray-500 mt-8">
+                    No events yet
+                  </div>
                 ) : (
                   <div style={{ marginTop: 30 }} className="bg-white rounded shadow p-6 w-full">
                     <div className="w-full overflow-x-auto">
@@ -116,10 +123,10 @@ function Calendar() {
                                   </div>
                                 </td>
                                 <td className="align-top py-3 px-4 text-left">
-                                  <div className="text-xs text-gray-500">{event.eventType}</div>
+                                  <div data-testid={`event-type-${event.eventType}`} className="text-xs text-gray-500">{event.eventType}</div>
                                 </td>
                                 <td className="align-top py-3 px-4 text-left">
-                                  <div className="text-xs text-gray-800">{event.eventName}</div>
+                                  <div data-testid={`event-name-${event.eventName}`} className="text-xs text-gray-800">{event.eventName}</div>
                                 </td>
                                 <td className="align-top py-3 px-4 text-left">
                                   <span className="text-sky-500 font-semibold text-xs cursor-pointer">Open</span>
@@ -141,7 +148,9 @@ function Calendar() {
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-gray-500 relative">
                 {todos.length === 0 ? (
-                  <div className="mt-4 text-lg text-gray-400">No todo event yet</div>
+                  <div data-testid="empty-todos-message" className="text-center text-gray-500 mt-8">
+                    No todos yet
+                  </div>
                 ) : (
                   <div style={{ marginTop: 30 }} className="bg-white rounded shadow p-6 w-full">
                     <div className="w-full overflow-x-auto">
@@ -161,10 +170,12 @@ function Calendar() {
                         <tbody>
                           {todos.map((todo, idx) => (
                             <tr key={idx} className="border-b last:border-0 group hover:bg-gray-50 transition">
-                              <td className="align-top py-3 px-4 text-left font-semibold text-yellow-900">{todo.taskName}</td>
+                              <td className="align-top py-3 px-4 text-left font-semibold text-yellow-900">
+                                <span data-testid={`todo-name-${todo.taskName}`}>{todo.taskName}</span>
+                              </td>
                               <td className="align-top py-3 px-4 text-left text-yellow-800">{todo.team || "—"}</td>
                               <td className="align-top py-3 px-4 text-left">
-                                <span className={`
+                                <span data-testid={`todo-priority-${todo.priority}`} className={`
                   text-xs font-bold px-2 py-1 rounded
                   ${todo.priority === "High" ? "bg-red-100 text-red-700" :
                                     todo.priority === "Medium" ? "bg-yellow-200 text-yellow-800" :
