@@ -7,15 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        primary: 'var(--primary)',
+        'primary-dark': 'var(--primary-dark)',
+        background: 'var(--background)',
+        text: 'var(--text)',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
@@ -40,6 +39,20 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      backgroundColor: {
+        primary: 'var(--primary)',
+        'primary-dark': 'var(--primary-dark)',
+        background: 'var(--background)',
+      },
+      textColor: {
+        primary: 'var(--primary)',
+        'primary-dark': 'var(--primary-dark)',
+        text: 'var(--text)',
+      },
+      borderColor: {
+        primary: 'var(--primary)',
+        'primary-dark': 'var(--primary-dark)',
       },
       borderRadius: {
         lg: "var(--radius)",
